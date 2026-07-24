@@ -37,6 +37,19 @@
             z-index: 10;
         }
 
+        /* النص الإرشادي فوق الصورة */
+        .click-hint {
+            font-size: 15px;
+            color: #d4af37;
+            text-align: center;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+            opacity: 0.9;
+            z-index: 10;
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+        }
+
         /* حاوية الصورة وتكنيك القلب بالسلس */
         .card-container {
             width: 90%;
@@ -254,6 +267,9 @@
     <div class="header-title">
         الأمراء | 𝔞𝔩 𝔭𝔯𝔧𝔫𝔠𝔢𝔰
     </div>
+
+    <!-- نص التنبيه فوق الصورة -->
+    <div class="click-hint">👈 اضغط على الصورة 👉</div>
 
     <!-- كرت الصورة القابل للقلب عند الضغط -->
     <div class="card-container" onclick="flipCard()">
