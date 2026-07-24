@@ -50,7 +50,7 @@
             text-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
         }
 
-        /* حاوية الصورة وتكنيك القلب بالسلس */
+        /* حاوية الصورة وتكنيك القلب السلس */
         .card-container {
             width: 90%;
             max-width: 480px;
@@ -70,7 +70,6 @@
             transform-style: preserve-3d;
         }
 
-        /* حالة انقِلاب الكرت عند الضغط */
         .card-inner.flipped {
             transform: rotateY(180deg);
         }
@@ -274,13 +273,11 @@
     <!-- كرت الصورة القابل للقلب عند الضغط -->
     <div class="card-container" onclick="flipCard()">
         <div class="card-inner" id="cardInner">
-            <!-- الواجهة الأمامية: image1 -->
             <div class="card-front">
                 <img id="img1" src="/static/image1.png" 
                      onerror="tryAlternativeImage(this, ['/static/image1.jpg', '/static/image1.jpeg', '/static/image 1.png', '/static/image 1.jpg', '/static/image1'])" 
                      alt="الصورة الرئيسية">
             </div>
-            <!-- الجوانب الخلفية: image 2 -->
             <div class="card-back">
                 <img id="img2" src="/static/image 2.png" 
                      onerror="tryAlternativeImage(this, ['/static/image 2.jpg', '/static/image 2.jpeg', '/static/image2.png', '/static/image2.jpg', '/static/image2'])" 
@@ -338,7 +335,7 @@
         </div>
     </div>
 
-    <!-- نافذة رسالة الشكر والإنهاء بعد التسجيل -->
+    <!-- نافذة رسالة الشكر والإنهاء -->
     <div class="modal-overlay" id="successModal">
         <div class="modal-card">
             <h3>شكرا لمشاركتك انتضر الموعد المحدد من قبل @mgpka للعبه</h3>
@@ -403,7 +400,6 @@
             card.classList.toggle('flipped');
         }
 
-        // دالة الفحص التلقائي لمسار الصورة وصيغتها
         function tryAlternativeImage(imgElement, alternatives) {
             if (alternatives && alternatives.length > 0) {
                 const nextSrc = alternatives.shift();
@@ -438,7 +434,7 @@
 
         function exitSite() { window.location.href = "about:blank"; window.close(); }
 
-        // --- 4. تسجيل المشارك وإرساله للسيرفر الموحد مع التثبت من الحقول ---
+        // --- 4. تسجيل المشارك وإرساله للسيرفر الموحد ---
         async function submitRegistration() {
             const name = document.getElementById('playerName').value.trim();
             const numberVal = document.getElementById('playerNumber').value;
@@ -449,30 +445,13 @@
             errorDiv.style.display = 'none';
             errorDiv.innerText = '';
 
-            // 1. فحص الاسم
-            if (!name) {
-                showError('يرجى كتابة الاسم بشكل صحيح');
-                return;
-            }
+            // فحص كلي أولي بالحجم العادي
+            if (!name) { showError('يرجى كتابة الاسم بشكل صحيح'); return; }
+            if (!telegram.startsWith('@')) { showError('اكتب يوزرك ب الشكل الاتي مثال @mgpka باستخدام @'); return; }
+            if (telegram.toLowerCase() === '@mgpka') { showError('هذا اليوزر غير مسموح باستخدامه'); return; }
 
-            // 2. فحص يوزر التليجرام وعلامة @
-            if (!telegram.startsWith('@')) {
-                showError('اكتب يوزرك ب الشكل الاتي مثال @mgpka باستخدام @');
-                return;
-            }
-
-            // 3. فحص اليوزر المحظور
-            if (telegram.toLowerCase() === '@mgpka') {
-                showError('هذا اليوزر غير مسموح باستخدامه');
-                return;
-            }
-
-            // 4. فحص الرقم والنطاق (1 إلى 30)
             const number = parseInt(numberVal);
-            if (isNaN(number) || number < 1 || number > 30) {
-                showError('خطأ: اختر رقم بين 1 و 30 فقط');
-                return;
-            }
+            if (isNaN(number) || number < 1 || number > 30) { showError('خطأ: اختر رقم بين 1 و 30 فقط'); return; }
 
             submitBtn.disabled = true;
             submitBtn.innerText = 'جاري الحفظ...';
@@ -511,7 +490,7 @@
             errorDiv.style.display = 'block';
         }
 
-        // --- 5. لوحة التحكم وجلب البيانات الموحدة من السيرفر ---
+        // --- 5. لوحة التحكم وجلب البيانات من السيرفر الموحد ---
         function openAdminLogin() { document.getElementById('adminLoginModal').style.display = 'flex'; }
         function closeAdminLogin() {
             document.getElementById('adminLoginModal').style.display = 'none';
