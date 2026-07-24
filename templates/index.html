@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الأمراء | 𝔞𝔩 𝔭𝔯𝔧𝔫𝔠𝔢𝔰</title>
-    <!-- Three.js للعرض والتحريك الـ 3D -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -27,6 +25,7 @@
             padding: 20px;
         }
 
+        /* العنوان العلوي */
         .header-title {
             font-size: 26px;
             font-weight: bold;
@@ -38,19 +37,56 @@
             z-index: 10;
         }
 
-        #canvas-container {
-            width: 100%;
-            height: 55vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: grab;
+        /* حاوية الصورة وتكنيك القلب بالسلس */
+        .card-container {
+            width: 90%;
+            max-width: 480px;
+            height: 280px;
+            perspective: 1000px;
+            cursor: pointer;
             z-index: 5;
-        }
-        #canvas-container:active {
-            cursor: grabbing;
+            margin: auto 0;
         }
 
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        /* حالة انقِلاب الكرت عند الضغط */
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.12);
+            border: 1px solid #333;
+            background-color: #111;
+        }
+
+        .card-front img, .card-back img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* شريط الأزرار السفلي */
         .button-bar {
             display: flex;
             gap: 20px;
@@ -91,6 +127,7 @@
             transform: translateY(-2px);
         }
 
+        /* النوافذ المنبثقة (Modal) */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -213,19 +250,39 @@
 </head>
 <body>
 
+    <!-- العنوان العلوي -->
     <div class="header-title">
         الأمراء | 𝔞𝔩 𝔭𝔯𝔧𝔫𝔠𝔢𝔰
     </div>
 
-    <div id="canvas-container"></div>
+    <!-- كرت الصورة القابل للقلب عند الضغط -->
+    <div class="card-container" onclick="flipCard()">
+        <div class="card-inner" id="cardInner">
+            <!-- الواجهة الأمامية: image1 -->
+            <div class="card-front">
+                <img id="img1" src="/static/image1.png" 
+                     onerror="tryAlternativeImage(this, ['/static/image1.jpg', '/static/image1.jpeg', '/static/image 1.png', '/static/image 1.jpg', '/static/image1'])" 
+                     alt="الصورة الرئيسية">
+            </div>
+            <!-- الجوانب الخلفية: image 2 -->
+            <div class="card-back">
+                <img id="img2" src="/static/image 2.png" 
+                     onerror="tryAlternativeImage(this, ['/static/image 2.jpg', '/static/image 2.jpeg', '/static/image2.png', '/static/image2.jpg', '/static/image2'])" 
+                     alt="الصورة الخلفية">
+            </div>
+        </div>
+    </div>
 
+    <!-- شريط الأزرار -->
     <div class="button-bar">
         <button class="btn btn-green" onclick="openConfirmModal()">المشاركة</button>
         <button class="btn btn-red" onclick="exitSite()">عدم المشاركة</button>
     </div>
 
+    <!-- زر لوحة التحكم -->
     <div class="admin-link" onclick="openAdminLogin()">⚙️ لوحة التحكم</div>
 
+    <!-- النافذة الأولى (تأكيد) -->
     <div class="modal-overlay" id="confirmModal">
         <div class="modal-card">
             <h3>هل أنت تأكد من أنك تريد المشاركة في هذه اللعبة؟</h3>
@@ -236,6 +293,7 @@
         </div>
     </div>
 
+    <!-- نافذة استمارة التسجيل -->
     <div class="modal-overlay" id="formModal">
         <div class="modal-card">
             <h3>للمشاركة املأ الحقول التالية</h3>
@@ -264,6 +322,7 @@
         </div>
     </div>
 
+    <!-- نافذة تسجيل دخول الأدمن -->
     <div class="modal-overlay" id="adminLoginModal">
         <div class="modal-card">
             <h3>تسجيل دخول لوحة التحكم</h3>
@@ -283,6 +342,7 @@
         </div>
     </div>
 
+    <!-- نافذة عرض المشاركين للأدمن -->
     <div class="modal-overlay" id="adminDashboardModal">
         <div class="modal-card" style="max-width: 550px; max-height: 80vh; overflow-y: auto;">
             <h3>قائمة المشاركين المسجلين</h3>
@@ -303,6 +363,7 @@
         </div>
     </div>
 
+    <!-- مشغل يوتيوب للموسيقى -->
     <iframe id="ytPlayer" 
             style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; left: -9999px;" 
             src="https://www.youtube.com/embed/q7uTnxYFDSw?enablejsapi=1&autoplay=1&mute=1&loop=1&playlist=q7uTnxYFDSw" 
@@ -310,6 +371,24 @@
     </iframe>
 
     <script>
+        // --- 1. دالة قلب الصورة ---
+        function flipCard() {
+            const card = document.getElementById('cardInner');
+            card.classList.toggle('flipped');
+        }
+
+        // دالة الفحص التلقائي لمسار الصورة وصيغتها
+        function tryAlternativeImage(imgElement, alternatives) {
+            if (alternatives && alternatives.length > 0) {
+                const nextSrc = alternatives.shift();
+                imgElement.onerror = function() {
+                    tryAlternativeImage(imgElement, alternatives);
+                };
+                imgElement.src = nextSrc;
+            }
+        }
+
+        // --- 2. تشغيل الموسيقى عند أول لمسة ---
         let audioStarted = false;
         function startAudio() {
             if (!audioStarted) {
@@ -322,98 +401,7 @@
         window.addEventListener('click', startAudio);
         window.addEventListener('touchstart', startAudio);
 
-        // --- إعداد المشهد الـ 3D ---
-        const container = document.getElementById('canvas-container');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        container.appendChild(renderer.domElement);
-
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
-        scene.add(ambientLight);
-
-        // إنشاء مجسم الكرت بوزن وسُمك أظهري ممتاز
-        const geometry = new THREE.BoxGeometry(3.6, 2.2, 0.08);
-
-        // تحميل الصور بروابط ثابتة ومباشرة مع إتاحة الخيارات الشائعة
-        const textureLoader = new THREE.TextureLoader();
-        
-        // مسارات أوتوماتيكية للصور
-        const frontTexture = textureLoader.load('/static/front.png');
-        const backTexture = textureLoader.load('/static/back.png');
-
-        // ألوان احتياطية خشبية فخمة لضمان إضاءة وثبات الكرت 3D دائماً
-        const sideMaterial = new THREE.MeshBasicMaterial({ color: 0x8a6d3b });
-        const frontMaterial = new THREE.MeshBasicMaterial({ map: frontTexture, color: 0xc29b38 });
-        const backMaterial = new THREE.MeshBasicMaterial({ map: backTexture, color: 0xc29b38 });
-
-        const materials = [
-            sideMaterial, sideMaterial, sideMaterial, sideMaterial,
-            frontMaterial, backMaterial
-        ];
-
-        const card = new THREE.Mesh(geometry, materials);
-        scene.add(card);
-        camera.position.z = 4.8;
-
-        // تحريك تفاعلي
-        let isDragging = false;
-        let previousMousePosition = { x: 0, y: 0 };
-
-        function onPointerDown(e) {
-            isDragging = true;
-            previousMousePosition = {
-                x: e.clientX || (e.touches && e.touches[0].clientX),
-                y: e.clientY || (e.touches && e.touches[0].clientY)
-            };
-        }
-
-        function onPointerMove(e) {
-            if (!isDragging) return;
-            const currentX = e.clientX || (e.touches && e.touches[0].clientX);
-            const currentY = e.clientY || (e.touches && e.touches[0].clientY);
-
-            const deltaX = currentX - previousMousePosition.x;
-            const deltaY = currentY - previousMousePosition.y;
-
-            card.rotation.y += deltaX * 0.01;
-            card.rotation.x += deltaY * 0.01;
-
-            previousMousePosition = { x: currentX, y: currentY };
-        }
-
-        function onPointerUp() { isDragging = false; }
-
-        container.addEventListener('mousedown', onPointerDown);
-        window.addEventListener('mousemove', onPointerMove);
-        window.addEventListener('mouseup', onPointerUp);
-
-        container.addEventListener('touchstart', onPointerDown);
-        window.addEventListener('touchmove', onPointerMove);
-        window.addEventListener('touchend', onPointerUp);
-
-        // تموج حركة 3D سلس وجميل
-        const clock = new THREE.Clock();
-        function animate() {
-            requestAnimationFrame(animate);
-            if (!isDragging) {
-                const elapsedTime = clock.getElapsedTime();
-                card.rotation.y = Math.sin(elapsedTime * 0.8) * 0.4;
-                card.rotation.x = Math.cos(elapsedTime * 0.5) * 0.12;
-            }
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
-        });
-
-        // الوظائف وإدارة البيانات
+        // --- 3. الوظائف وإدارة البيانات ---
         function getParticipants() { return JSON.parse(localStorage.getItem('princes_participants') || '[]'); }
         function saveParticipants(data) { localStorage.setItem('princes_participants', JSON.stringify(data)); }
 
