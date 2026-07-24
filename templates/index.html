@@ -27,7 +27,6 @@
             padding: 20px;
         }
 
-        /* العنوان العلوي */
         .header-title {
             font-size: 26px;
             font-weight: bold;
@@ -39,7 +38,6 @@
             z-index: 10;
         }
 
-        /* حاوية العرض الـ 3D */
         #canvas-container {
             width: 100%;
             height: 55vh;
@@ -53,7 +51,6 @@
             cursor: grabbing;
         }
 
-        /* شريط الأزرار السفلي */
         .button-bar {
             display: flex;
             gap: 20px;
@@ -94,7 +91,6 @@
             transform: translateY(-2px);
         }
 
-        /* النوافذ المنبثقة (Modal) */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -173,7 +169,6 @@
             margin-top: 20px;
         }
 
-        /* زر لوحة التحكم البارز والواضح */
         .admin-link {
             position: fixed;
             bottom: 12px;
@@ -218,24 +213,19 @@
 </head>
 <body>
 
-    <!-- العنوان العلوي -->
     <div class="header-title">
         الأمراء | 𝔞𝔩 𝔭𝔯𝔧𝔫𝔠𝔢𝔰
     </div>
 
-    <!-- حاوية الصورة الـ 3D -->
     <div id="canvas-container"></div>
 
-    <!-- شريط الأزرار -->
     <div class="button-bar">
         <button class="btn btn-green" onclick="openConfirmModal()">المشاركة</button>
         <button class="btn btn-red" onclick="exitSite()">عدم المشاركة</button>
     </div>
 
-    <!-- زر لوحة التحكم الذهبي الواضح -->
     <div class="admin-link" onclick="openAdminLogin()">⚙️ لوحة التحكم</div>
 
-    <!-- النافذة الأولى (تأكيد) -->
     <div class="modal-overlay" id="confirmModal">
         <div class="modal-card">
             <h3>هل أنت تأكد من أنك تريد المشاركة في هذه اللعبة؟</h3>
@@ -246,7 +236,6 @@
         </div>
     </div>
 
-    <!-- نافذة استمارة التسجيل -->
     <div class="modal-overlay" id="formModal">
         <div class="modal-card">
             <h3>للمشاركة املأ الحقول التالية</h3>
@@ -275,7 +264,6 @@
         </div>
     </div>
 
-    <!-- نافذة تسجيل دخول الأدمن -->
     <div class="modal-overlay" id="adminLoginModal">
         <div class="modal-card">
             <h3>تسجيل دخول لوحة التحكم</h3>
@@ -295,7 +283,6 @@
         </div>
     </div>
 
-    <!-- نافذة عرض المشاركين للأدمن -->
     <div class="modal-overlay" id="adminDashboardModal">
         <div class="modal-card" style="max-width: 550px; max-height: 80vh; overflow-y: auto;">
             <h3>قائمة المشاركين المسجلين</h3>
@@ -316,7 +303,6 @@
         </div>
     </div>
 
-    <!-- مشغل يوتيوب للموسيقى -->
     <iframe id="ytPlayer" 
             style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; left: -9999px;" 
             src="https://www.youtube.com/embed/q7uTnxYFDSw?enablejsapi=1&autoplay=1&mute=1&loop=1&playlist=q7uTnxYFDSw" 
@@ -324,7 +310,6 @@
     </iframe>
 
     <script>
-        // --- 1. تشغيل الموسيقى عند أول تفاعل ---
         let audioStarted = false;
         function startAudio() {
             if (!audioStarted) {
@@ -337,7 +322,7 @@
         window.addEventListener('click', startAudio);
         window.addEventListener('touchstart', startAudio);
 
-        // --- 2. إعداد العرض الـ 3D التفاعلي المنتظم ---
+        // --- إعداد المشهد الـ 3D ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
@@ -346,31 +331,34 @@
         renderer.setSize(container.clientWidth, container.clientHeight);
         container.appendChild(renderer.domElement);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
         scene.add(ambientLight);
 
-        // كرت بعرض وسُمك متناسق
-        const geometry = new THREE.BoxGeometry(3.6, 2.2, 0.1);
+        // إنشاء مجسم الكرت بوزن وسُمك أظهري ممتاز
+        const geometry = new THREE.BoxGeometry(3.6, 2.2, 0.08);
 
-        // تحميل الصور باستخدام روابط Flask المباشرة
+        // تحميل الصور بروابط ثابتة ومباشرة مع إتاحة الخيارات الشائعة
         const textureLoader = new THREE.TextureLoader();
-        const frontTexture = textureLoader.load("{{ url_for('static', filename='front.png') }}");
-        const backTexture = textureLoader.load("{{ url_for('static', filename='back.png') }}");
+        
+        // مسارات أوتوماتيكية للصور
+        const frontTexture = textureLoader.load('/static/front.png');
+        const backTexture = textureLoader.load('/static/back.png');
+
+        // ألوان احتياطية خشبية فخمة لضمان إضاءة وثبات الكرت 3D دائماً
+        const sideMaterial = new THREE.MeshBasicMaterial({ color: 0x8a6d3b });
+        const frontMaterial = new THREE.MeshBasicMaterial({ map: frontTexture, color: 0xc29b38 });
+        const backMaterial = new THREE.MeshBasicMaterial({ map: backTexture, color: 0xc29b38 });
 
         const materials = [
-            new THREE.MeshBasicMaterial({ color: 0x8a6d3b }),
-            new THREE.MeshBasicMaterial({ color: 0x8a6d3b }),
-            new THREE.MeshBasicMaterial({ color: 0x8a6d3b }),
-            new THREE.MeshBasicMaterial({ color: 0x8a6d3b }),
-            new THREE.MeshBasicMaterial({ map: frontTexture }),
-            new THREE.MeshBasicMaterial({ map: backTexture })
+            sideMaterial, sideMaterial, sideMaterial, sideMaterial,
+            frontMaterial, backMaterial
         ];
 
         const card = new THREE.Mesh(geometry, materials);
         scene.add(card);
-        camera.position.z = 5.0;
+        camera.position.z = 4.8;
 
-        // تحريك 3D تفاعلي مع الماوس واللمس
+        // تحريك تفاعلي
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
 
@@ -406,14 +394,14 @@
         window.addEventListener('touchmove', onPointerMove);
         window.addEventListener('touchend', onPointerUp);
 
-        // تموج حركة 3D سلس يمنع انقلاب الصورة للحافة الضيقة
+        // تموج حركة 3D سلس وجميل
         const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
             if (!isDragging) {
                 const elapsedTime = clock.getElapsedTime();
-                card.rotation.y = Math.sin(elapsedTime * 0.8) * 0.35;
-                card.rotation.x = Math.cos(elapsedTime * 0.5) * 0.1;
+                card.rotation.y = Math.sin(elapsedTime * 0.8) * 0.4;
+                card.rotation.x = Math.cos(elapsedTime * 0.5) * 0.12;
             }
             renderer.render(scene, camera);
         }
@@ -425,14 +413,9 @@
             renderer.setSize(container.clientWidth, container.clientHeight);
         });
 
-        // --- 3. إدارة البيانات والوظائف ---
-        function getParticipants() {
-            return JSON.parse(localStorage.getItem('princes_participants') || '[]');
-        }
-
-        function saveParticipants(data) {
-            localStorage.setItem('princes_participants', JSON.stringify(data));
-        }
+        // الوظائف وإدارة البيانات
+        function getParticipants() { return JSON.parse(localStorage.getItem('princes_participants') || '[]'); }
+        function saveParticipants(data) { localStorage.setItem('princes_participants', JSON.stringify(data)); }
 
         function openConfirmModal() { document.getElementById('confirmModal').style.display = 'flex'; }
         function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
@@ -442,10 +425,7 @@
             document.getElementById('formError').style.display = 'none';
         }
 
-        function exitSite() {
-            window.location.href = "about:blank";
-            window.close();
-        }
+        function exitSite() { window.location.href = "about:blank"; window.close(); }
 
         function submitRegistration() {
             const name = document.getElementById('playerName').value.trim();
@@ -477,7 +457,6 @@
             errorDiv.style.display = 'block';
         }
 
-        // --- 4. لوحة التحكم ---
         function openAdminLogin() { document.getElementById('adminLoginModal').style.display = 'flex'; }
         function closeAdminLogin() {
             document.getElementById('adminLoginModal').style.display = 'none';
