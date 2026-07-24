@@ -168,9 +168,9 @@
 
         .modal-card h3 {
             margin-bottom: 20px;
-            font-size: 20px;
+            font-size: 18px;
             color: #fff;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         .form-group {
@@ -332,8 +332,18 @@
             <div class="error-msg" id="formError"></div>
 
             <div class="modal-btns">
-                <button class="btn btn-green" onclick="submitRegistration()">تأكيد التسجيل</button>
+                <button class="btn btn-green" id="submitBtn" onclick="submitRegistration()">تأكيد التسجيل</button>
                 <button class="btn btn-red" style="background:#555;" onclick="closeFormModal()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة رسالة الشكر والإنهاء بعد التسجيل -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-card">
+            <h3>شكرا لمشاركتك انتضر الموعد المحدد من قبل @mgpka للعبه</h3>
+            <div class="modal-btns" style="margin-top: 25px;">
+                <button class="btn btn-red" style="width: 100%;" onclick="exitSite()">تم / الخروج</button>
             </div>
         </div>
     </div>
@@ -417,10 +427,7 @@
         window.addEventListener('click', startAudio);
         window.addEventListener('touchstart', startAudio);
 
-        // --- 3. الوظائف وإدارة البيانات ---
-        function getParticipants() { return JSON.parse(localStorage.getItem('princes_participants') || '[]'); }
-        function saveParticipants(data) { localStorage.setItem('princes_participants', JSON.stringify(data)); }
-
+        // --- 3. الوظائف والنوافذ ---
         function openConfirmModal() { document.getElementById('confirmModal').style.display = 'flex'; }
         function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
         function goToForm() { closeConfirmModal(); document.getElementById('formModal').style.display = 'flex'; }
@@ -431,28 +438,71 @@
 
         function exitSite() { window.location.href = "about:blank"; window.close(); }
 
-        function submitRegistration() {
+        // --- 4. تسجيل المشارك وإرساله للسيرفر الموحد مع التثبت من الحقول ---
+        async function submitRegistration() {
             const name = document.getElementById('playerName').value.trim();
-            const number = parseInt(document.getElementById('playerNumber').value);
+            const numberVal = document.getElementById('playerNumber').value;
             const telegram = document.getElementById('playerTelegram').value.trim();
+            const errorDiv = document.getElementById('formError');
+            const submitBtn = document.getElementById('submitBtn');
 
-            if (!name) { showError('يرجى كتابة الاسم بشكل صحيح'); return; }
-            if (isNaN(number) || number < 1 || number > 30) { showError('خطأ: اختر رقم بين 1 و 30 فقط'); return; }
+            errorDiv.style.display = 'none';
+            errorDiv.innerText = '';
 
-            const participants = getParticipants();
-            if (participants.some(p => p.number === number)) { showError('الرقم محجوز اختر رقم اخر'); return; }
+            // 1. فحص الاسم
+            if (!name) {
+                showError('يرجى كتابة الاسم بشكل صحيح');
+                return;
+            }
 
-            if (!telegram.startsWith('@')) { showError('اكتب يوزرك ب الشكل الاتي مثال @mgpka باستخدام @'); return; }
-            if (telegram.toLowerCase() === '@mgpka') { showError('هذا اليوزر غير مسموح باستخدامه'); return; }
+            // 2. فحص يوزر التليجرام وعلامة @
+            if (!telegram.startsWith('@')) {
+                showError('اكتب يوزرك ب الشكل الاتي مثال @mgpka باستخدام @');
+                return;
+            }
 
-            participants.push({ name, number, telegram });
-            saveParticipants(participants);
+            // 3. فحص اليوزر المحظور
+            if (telegram.toLowerCase() === '@mgpka') {
+                showError('هذا اليوزر غير مسموح باستخدامه');
+                return;
+            }
 
-            alert('تم تسجيل مشاركتك بنجاح في اللعبة! 🎯');
-            closeFormModal();
-            document.getElementById('playerName').value = '';
-            document.getElementById('playerNumber').value = '';
-            document.getElementById('playerTelegram').value = '';
+            // 4. فحص الرقم والنطاق (1 إلى 30)
+            const number = parseInt(numberVal);
+            if (isNaN(number) || number < 1 || number > 30) {
+                showError('خطأ: اختر رقم بين 1 و 30 فقط');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'جاري الحفظ...';
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, number, telegram })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    closeFormModal();
+                    // إظهار نافذة الشكر والإنهاء
+                    document.getElementById('successModal').style.display = 'flex';
+                    // تفريغ الحقول
+                    document.getElementById('playerName').value = '';
+                    document.getElementById('playerNumber').value = '';
+                    document.getElementById('playerTelegram').value = '';
+                } else {
+                    showError(result.message || 'حدث خطأ أثناء التسجيل');
+                }
+            } catch (err) {
+                showError('تعذر الاتصال بالسيرفر، تأكد من اتصال الإنترنت');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'تأكيد التسجيل';
+            }
         }
 
         function showError(msg) {
@@ -461,6 +511,7 @@
             errorDiv.style.display = 'block';
         }
 
+        // --- 5. لوحة التحكم وجلب البيانات الموحدة من السيرفر ---
         function openAdminLogin() { document.getElementById('adminLoginModal').style.display = 'flex'; }
         function closeAdminLogin() {
             document.getElementById('adminLoginModal').style.display = 'none';
@@ -487,34 +538,47 @@
 
         function closeAdminDashboard() { document.getElementById('adminDashboardModal').style.display = 'none'; }
 
-        function renderAdminTable() {
+        async function renderAdminTable() {
             const tbody = document.getElementById('adminTableBody');
-            tbody.innerHTML = '';
-            const participants = getParticipants();
+            tbody.innerHTML = '<tr><td colspan="4">جاري تحميل القائمة من السيرفر...</td></tr>';
 
-            if (participants.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4">لا يوجد مشاركين مسجلين حالياً</td></tr>';
-                return;
+            try {
+                const response = await fetch('/api/participants');
+                const participants = await response.json();
+
+                tbody.innerHTML = '';
+                if (!participants || participants.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4">لا يوجد مشاركين مسجلين حالياً</td></tr>';
+                    return;
+                }
+
+                participants.forEach((p, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${p.name}</td>
+                        <td><b>${p.number}</b></td>
+                        <td>${p.telegram}</td>
+                        <td><button class="btn-delete" onclick="deleteParticipant(${index})">حذف</button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="4">حدث خطأ أثناء جلب القائمة من السيرفر</td></tr>';
             }
-
-            participants.forEach((p, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${p.name}</td>
-                    <td><b>${p.number}</b></td>
-                    <td>${p.telegram}</td>
-                    <td><button class="btn-delete" onclick="deleteParticipant(${index})">حذف</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
         }
 
-        function deleteParticipant(index) {
+        async function deleteParticipant(index) {
             if (confirm('هل أنت تأكد من حذف هذا المشارك؟ سيتم إتاحة رقمه للجميع مجدداً.')) {
-                let participants = getParticipants();
-                participants.splice(index, 1);
-                saveParticipants(participants);
-                renderAdminTable();
+                try {
+                    await fetch('/api/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ index })
+                    });
+                    renderAdminTable();
+                } catch (err) {
+                    alert('حدث خطأ أثناء الحذف من السيرفر');
+                }
             }
         }
     </script>
