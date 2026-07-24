@@ -173,16 +173,26 @@
             margin-top: 20px;
         }
 
+        /* زر لوحة التحكم البارز والواضح */
         .admin-link {
             position: fixed;
-            bottom: 5px;
-            left: 10px;
-            font-size: 11px;
-            color: #333;
+            bottom: 12px;
+            left: 12px;
+            font-size: 13px;
+            color: #d4af37;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            padding: 6px 14px;
+            border-radius: 20px;
             cursor: pointer;
             z-index: 10;
+            transition: all 0.3s ease;
         }
-        .admin-link:hover { color: #666; }
+        .admin-link:hover {
+            background: rgba(212, 175, 55, 0.2);
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
 
         .admin-table {
             width: 100%;
@@ -222,8 +232,8 @@
         <button class="btn btn-red" onclick="exitSite()">عدم المشاركة</button>
     </div>
 
-    <!-- زر لوحة التحكم -->
-    <div class="admin-link" onclick="openAdminLogin()">لوحة التحكم ⚙️</div>
+    <!-- زر لوحة التحكم الذهبي الواضح -->
+    <div class="admin-link" onclick="openAdminLogin()">⚙️ لوحة التحكم</div>
 
     <!-- النافذة الأولى (تأكيد) -->
     <div class="modal-overlay" id="confirmModal">
@@ -327,7 +337,7 @@
         window.addEventListener('click', startAudio);
         window.addEventListener('touchstart', startAudio);
 
-        // --- 2. إعداد كرت الـ 3D العريض بملفات الصور الخاصة بك ---
+        // --- 2. إعداد العرض الـ 3D التفاعلي المنتظم ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
@@ -336,31 +346,31 @@
         renderer.setSize(container.clientWidth, container.clientHeight);
         container.appendChild(renderer.domElement);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
         scene.add(ambientLight);
 
-        // أبعاد عرضية تتناسب مع مقاس صورتك (عرض 3.8 مقابل ارتفاع 2.3)
-        const geometry = new THREE.BoxGeometry(3.8, 2.3, 0.05);
+        // كرت بعرض وسُمك متناسق
+        const geometry = new THREE.BoxGeometry(3.6, 2.2, 0.1);
 
-        // تحميل الصور من مجلد static
+        // تحميل الصور باستخدام روابط Flask المباشرة
         const textureLoader = new THREE.TextureLoader();
-        const frontTexture = textureLoader.load('/static/front.png');
-        const backTexture = textureLoader.load('/static/back.png');
+        const frontTexture = textureLoader.load("{{ url_for('static', filename='front.png') }}");
+        const backTexture = textureLoader.load("{{ url_for('static', filename='back.png') }}");
 
         const materials = [
-            new THREE.MeshBasicMaterial({ color: 0x8a6d3b }), // حافة يمين
-            new THREE.MeshBasicMaterial({ color: 0x8a6d3b }), // حافة يسار
-            new THREE.MeshBasicMaterial({ color: 0x8a6d3b }), // حافة أعلى
-            new THREE.MeshBasicMaterial({ color: 0x8a6d3b }), // حافة أسفل
-            new THREE.MeshBasicMaterial({ map: frontTexture }), // الوجه الأمامي (الأشكال)
-            new THREE.MeshBasicMaterial({ map: backTexture })   // الوجه الخلفي (الترحيب)
+            new THREE.MeshBasicMaterial({ color: 0x8a6d3b }),
+            new THREE.MeshBasicMaterial({ color: 0x8a6d3b }),
+            new THREE.MeshBasicMaterial({ color: 0x8a6d3b }),
+            new THREE.MeshBasicMaterial({ color: 0x8a6d3b }),
+            new THREE.MeshBasicMaterial({ map: frontTexture }),
+            new THREE.MeshBasicMaterial({ map: backTexture })
         ];
 
         const card = new THREE.Mesh(geometry, materials);
         scene.add(card);
-        camera.position.z = 5.2;
+        camera.position.z = 5.0;
 
-        // سحب وتدوير الـ 3D
+        // تحريك 3D تفاعلي مع الماوس واللمس
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
 
@@ -396,10 +406,14 @@
         window.addEventListener('touchmove', onPointerMove);
         window.addEventListener('touchend', onPointerUp);
 
+        // تموج حركة 3D سلس يمنع انقلاب الصورة للحافة الضيقة
+        const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
             if (!isDragging) {
-                card.rotation.y += 0.004;
+                const elapsedTime = clock.getElapsedTime();
+                card.rotation.y = Math.sin(elapsedTime * 0.8) * 0.35;
+                card.rotation.x = Math.cos(elapsedTime * 0.5) * 0.1;
             }
             renderer.render(scene, camera);
         }
