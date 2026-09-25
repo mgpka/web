@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>مافيا الأمراء | 𝔞𝔩 𝔭𝔯𝔧𝔫𝔠𝔢𝔰</title>
+    <!-- مكتبة YouTube IFrame الرسمية لتشغيل موسيقى العراب في كروم والموبايل -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -14,7 +16,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* قفل التمرير العرضي والتكيف التام مع شاشات كروم الموبايل */
         html, body {
             width: 100%;
             max-width: 100vw;
@@ -97,7 +98,7 @@
             text-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
         }
 
-        /* حاوية كرت المافيا المتجاوبة بنسبة 16:9 مع منع الانهيار */
+        /* حاوية كرت المافيا */
         .card-container {
             width: 100%;
             max-width: 440px;
@@ -244,7 +245,7 @@
         }
         .form-group input:focus { border-color: #d4af37; }
 
-        /* شبكة الأرقام */
+        /* شبكة أزرار الأرقام (1 إلى 10) */
         .numbers-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -345,7 +346,7 @@
     <!-- نص التنبيه فوق الصورة -->
     <div class="click-hint">👈 اضغط على الصورة 👉</div>
 
-    <!-- كرت الصورة القابل للقلب -->
+    <!-- كرت الصورة القابل للقلب عند الضغط وتشغيل الموسيقى -->
     <div class="card-container" onclick="flipCard()">
         <div class="card-inner" id="cardInner">
             <div class="card-front">
@@ -468,31 +469,59 @@
         </div>
     </div>
 
-    <!-- مشغل موسيقى العراب بالخلفية -->
-    <iframe id="ytPlayer" 
-            style="position: fixed; top:-9999px; left:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;" 
-            src="" 
-            allow="autoplay">
-    </iframe>
+    <!-- حاوية مشغل الصوت المخفية ولكنها متوافقة مع سياسة كروم -->
+    <div style="position: fixed; bottom: 0; right: 0; width: 200px; height: 200px; opacity: 0.001; pointer-events: none; z-index: -9999; overflow: hidden;">
+        <div id="ytPlayerContainer"></div>
+    </div>
 
     <script>
-        let currentParticipants = [];
-        let audioStarted = false;
+        // تثبيت معرّف موسيقى العرّاب الرسمية
+        const MUSIC_VIDEO_ID = "AJgE_dLWsuQ";
 
-        // تشغيل الموسيقى فور أول لمسة للموقع بدون تعليق
-        function triggerMusicOnFirstInteraction() {
-            if (!audioStarted) {
-                audioStarted = true;
-                const iframe = document.getElementById('ytPlayer');
-                iframe.src = "https://www.youtube.com/embed/AJgE_dLWsuQ?autoplay=1&loop=1&playlist=AJgE_dLWsuQ";
+        let currentParticipants = [];
+        let ytPlayer = null;
+        let isPlayerReady = false;
+        let hasStartedMusic = false;
+
+        // تهيئة المشغل الرسمي
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('ytPlayerContainer', {
+                width: '200',
+                height: '200',
+                videoId: MUSIC_VIDEO_ID,
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'loop': 1,
+                    'playlist': MUSIC_VIDEO_ID,
+                    'playsinline': 1,
+                    'enablejsapi': 1
+                },
+                events: {
+                    'onReady': function(event) {
+                        isPlayerReady = true;
+                    }
+                }
+            });
+        }
+
+        // دالة تشغيل الموسيقى فور اللمس لتجاوز قيود كروم
+        function playBackgroundMusic() {
+            if (hasStartedMusic) return;
+            hasStartedMusic = true;
+
+            if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+                try {
+                    ytPlayer.unMute();
+                    ytPlayer.setVolume(100);
+                    ytPlayer.playVideo();
+                } catch(e) {}
             }
         }
-        window.addEventListener('click', triggerMusicOnFirstInteraction, { once: true });
-        window.addEventListener('touchstart', triggerMusicOnFirstInteraction, { once: true });
 
-        // 1. قلب الصورة
+        // 1. قلب الصورة وتشغيل الموسيقى
         function flipCard() {
-            triggerMusicOnFirstInteraction();
+            playBackgroundMusic();
             document.getElementById('cardInner').classList.toggle('flipped');
         }
 
@@ -506,7 +535,7 @@
             }
         }
 
-        // 2. فحص المقاعد
+        // 2. فحص حالة المقاعد
         async function fetchServerStatus() {
             try {
                 const res = await fetch('/api/participants');
@@ -554,17 +583,16 @@
         }
 
         function openConfirmModal() {
-            triggerMusicOnFirstInteraction();
+            playBackgroundMusic();
             document.getElementById('confirmModal').style.display = 'flex';
         }
         function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
         
-        // فتح الاستمارة فوراً بدون أي تأخير أو تجميد
         function goToForm() { 
             closeConfirmModal(); 
-            renderNumberButtons(); // عرض الأرقام المتوفرة فوراً
+            renderNumberButtons();
             document.getElementById('formModal').style.display = 'flex'; 
-            fetchServerStatus().then(() => renderNumberButtons()); // تحديث دقيق بالخلفية
+            fetchServerStatus().then(() => renderNumberButtons());
         }
 
         function closeFormModal() {
@@ -574,7 +602,7 @@
 
         function exitSite() { window.location.href = "about:blank"; window.close(); }
 
-        // 4. التسجيل
+        // 4. إرسال التسجيل
         async function submitRegistration() {
             const name = document.getElementById('playerName').value.trim();
             const numberVal = document.getElementById('playerNumber').value;
