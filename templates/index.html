@@ -2,95 +2,106 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>مافيا الأمراء | 𝔞𝔩 𝔭𝔯𝔧𝔫𝔠𝔢𝔰</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* قفل التمرير العرضي والتكيف التام مع شاشات كروم الموبايل */
+        html, body {
+            width: 100%;
+            max-width: 100vw;
+            min-height: 100vh;
+            min-height: 100dvh;
+            background: #0a0908;
+            color: #ffffff;
+            overflow-x: hidden !important;
+            touch-action: pan-y;
+            position: relative;
         }
 
         body {
-            background: radial-gradient(circle at center, #181818 0%, #080808 70%, #000000 100%);
-            color: #ffffff;
-            height: 100vh;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 15px;
-            position: relative;
+            padding: 12px 10px 30px 10px;
+        }
+
+        .gold-text {
+            color: #d4af37;
+            text-shadow: 0 0 12px rgba(212, 175, 55, 0.4), 0 2px 4px rgba(0,0,0,0.9);
         }
 
         /* العلامة المائية الخلفية للمافيا */
         .mafia-watermark {
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-12deg);
             font-size: 18vw;
             font-weight: 900;
-            color: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.025);
             letter-spacing: 15px;
             pointer-events: none;
             z-index: 1;
         }
 
-        /* العنوان العلوي المزخرف */
+        /* العنوان العلوي */
         .header-section {
             text-align: center;
-            margin-top: 5px;
+            margin-top: 4px;
             z-index: 10;
         }
 
         .header-title {
-            font-size: 26px;
-            font-weight: bold;
+            font-size: 24px;
+            font-weight: 900;
             color: #d4af37;
             text-align: center;
-            letter-spacing: 2px;
-            text-shadow: 0 0 12px rgba(212, 175, 55, 0.4), 0 2px 4px rgba(0,0,0,0.8);
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
         }
 
-        /* بادج المقاعد المتبقية */
         .seats-badge {
             display: inline-block;
             margin-top: 6px;
             font-size: 13px;
-            padding: 3px 12px;
-            background: rgba(212, 175, 55, 0.1);
-            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 4px 14px;
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px solid rgba(212, 175, 55, 0.35);
             border-radius: 15px;
             color: #f3e5ab;
             letter-spacing: 1px;
+            font-weight: bold;
         }
 
-        /* النص الإرشادي فوق الصورة */
         .click-hint {
-            font-size: 15px;
+            font-size: 14px;
             color: #d4af37;
             text-align: center;
-            margin-top: 10px;
-            margin-bottom: 5px;
+            margin: 8px 0 4px 0;
             letter-spacing: 1px;
-            opacity: 0.9;
             z-index: 10;
             text-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
         }
 
-        /* حاوية الصورة وتكنيك القلب السلس */
+        /* حاوية كرت المافيا المتجاوبة بنسبة 16:9 مع منع الانهيار */
         .card-container {
-            width: 90%;
-            max-width: 480px;
-            height: 270px;
+            width: 100%;
+            max-width: 440px;
+            aspect-ratio: 16 / 9;
             perspective: 1000px;
             cursor: pointer;
             z-index: 5;
@@ -112,15 +123,19 @@
 
         .card-front, .card-back {
             position: absolute;
+            top: 0; left: 0;
             width: 100%;
             height: 100%;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.9), 0 0 15px rgba(212, 175, 55, 0.15);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            background-color: #111;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.9), 0 0 15px rgba(212, 175, 55, 0.2);
+            border: 1.5px solid rgba(212, 175, 55, 0.4);
+            background: #141414;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .card-front img, .card-back img {
@@ -137,8 +152,8 @@
         /* شريط الأزرار السفلي */
         .button-bar {
             display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 15px;
             z-index: 10;
             width: 100%;
             max-width: 380px;
@@ -146,25 +161,23 @@
 
         .btn {
             flex: 1;
-            padding: 14px 20px;
+            padding: 13px 18px;
             border: none;
             border-radius: 8px;
-            font-size: 18px;
+            font-size: 17px;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
             color: white;
             text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: transform 0.15s;
         }
+        .btn:active { transform: scale(0.97); }
 
         .btn-green {
             background-color: #1b5e20;
             box-shadow: 0 4px 15px rgba(27, 94, 32, 0.5);
             border: 1px solid #2e7d32;
-        }
-        .btn-green:hover {
-            background-color: #2e7d32;
-            transform: translateY(-2px);
         }
 
         .btn-red {
@@ -172,40 +185,35 @@
             box-shadow: 0 4px 15px rgba(139, 0, 0, 0.5);
             border: 1px solid #b71c1c;
         }
-        .btn-red:hover {
-            background-color: #a71d1d;
-            transform: translateY(-2px);
-        }
 
         /* النوافذ المنبثقة */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0.88);
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 100;
+            z-index: 10000;
             backdrop-filter: blur(5px);
+            padding: 15px;
         }
 
         .modal-card {
             background: #111111;
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            border-radius: 12px;
-            padding: 22px;
-            width: 90%;
-            max-width: 420px;
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+            border: 1.5px solid rgba(212, 175, 55, 0.4);
+            border-radius: 14px;
+            padding: 22px 18px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.95);
             text-align: center;
         }
 
         .modal-card h3 {
-            margin-bottom: 18px;
-            font-size: 18px;
+            margin-bottom: 16px;
+            font-size: 17px;
             color: #d4af37;
             line-height: 1.6;
         }
@@ -218,7 +226,7 @@
         .form-group label {
             display: block;
             margin-bottom: 6px;
-            font-size: 14px;
+            font-size: 13px;
             color: #bbb;
         }
 
@@ -234,33 +242,25 @@
             direction: ltr;
             text-align: right;
         }
+        .form-group input:focus { border-color: #d4af37; }
 
-        .form-group input:focus {
-            border-color: #d4af37;
-        }
-
-        /* شبكة أزرار الأرقام (1 إلى 10) */
+        /* شبكة الأرقام */
         .numbers-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
+            gap: 6px;
             margin-top: 6px;
         }
 
         .num-btn {
             padding: 10px 0;
-            background: #222;
+            background: #202020;
             border: 1px solid #444;
             border-radius: 6px;
             color: #fff;
             font-size: 15px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .num-btn:hover:not(.locked) {
-            border-color: #d4af37;
-            color: #d4af37;
         }
         .num-btn.selected {
             background: #d4af37;
@@ -270,11 +270,11 @@
         }
         .num-btn.locked {
             background: #141414;
-            border-color: #222;
+            border-color: #262626;
             color: #555;
             cursor: not-allowed;
             text-decoration: line-through;
-            opacity: 0.5;
+            opacity: 0.4;
         }
 
         .error-msg {
@@ -296,33 +296,27 @@
 
         .admin-link {
             position: fixed;
-            bottom: 12px;
-            left: 12px;
-            font-size: 13px;
+            bottom: 10px;
+            left: 10px;
+            font-size: 12px;
             color: #d4af37;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             border: 1px solid rgba(212, 175, 55, 0.4);
-            padding: 6px 14px;
+            padding: 5px 12px;
             border-radius: 20px;
             cursor: pointer;
-            z-index: 10;
-            transition: all 0.3s ease;
-        }
-        .admin-link:hover {
-            background: rgba(212, 175, 55, 0.2);
-            color: #ffffff;
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+            z-index: 100;
         }
 
         .admin-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
-            font-size: 13px;
+            font-size: 12px;
         }
         .admin-table th, .admin-table td {
             border: 1px solid #2a2a2a;
-            padding: 8px;
+            padding: 8px 4px;
             text-align: center;
         }
         .admin-table th { background: #1c1c1c; color: #d4af37; }
@@ -338,7 +332,6 @@
 </head>
 <body>
 
-    <!-- العلامة المائية -->
     <div class="mafia-watermark">MAFIA</div>
 
     <!-- العنوان العلوي -->
@@ -352,17 +345,17 @@
     <!-- نص التنبيه فوق الصورة -->
     <div class="click-hint">👈 اضغط على الصورة 👉</div>
 
-    <!-- كرت الصورة القابل للقلب عند الضغط -->
+    <!-- كرت الصورة القابل للقلب -->
     <div class="card-container" onclick="flipCard()">
         <div class="card-inner" id="cardInner">
             <div class="card-front">
                 <img id="img1" src="/static/image1.png" 
-                     onerror="tryAlternativeImage(this, ['/static/image1.jpg', '/static/image1.jpeg', '/static/image 1.png', '/static/image 1.jpg', '/static/image1'])" 
+                     onerror="tryAlternativeImage(this, ['/static/image1.jpg', '/static/image1.jpeg', '/static/image 1.png', '/static/image 1.jpg'])" 
                      alt="واجهة المافيا">
             </div>
             <div class="card-back">
                 <img id="img2" src="/static/image 2.png" 
-                     onerror="tryAlternativeImage(this, ['/static/image 2.jpg', '/static/image 2.jpeg', '/static/image2.png', '/static/image2.jpg', '/static/image2'])" 
+                     onerror="tryAlternativeImage(this, ['/static/image 2.jpg', '/static/image 2.jpeg', '/static/image2.png', '/static/image2.jpg'])" 
                      alt="تعليمات المافيا">
             </div>
         </div>
@@ -421,8 +414,8 @@
     <!-- نافذة رسالة الشكر والإنهاء -->
     <div class="modal-overlay" id="successModal">
         <div class="modal-card">
-            <h3 style="color:#ffffff;">شكرا لمشاركتك انتضر الموعد المحدد من قبل @mgpka للعبه</h3>
-            <div class="modal-btns" style="margin-top: 25px;">
+            <h3 style="color:#ffffff;">شكراً لمشاركتك! انتظر الموعد المحدد من قبل @mgpka للعبة.</h3>
+            <div class="modal-btns" style="margin-top: 20px;">
                 <button class="btn btn-red" style="width: 100%;" onclick="exitSite()">تم / الخروج</button>
             </div>
         </div>
@@ -450,12 +443,12 @@
 
     <!-- نافذة عرض المشاركين للأدمن -->
     <div class="modal-overlay" id="adminDashboardModal">
-        <div class="modal-card" style="max-width: 550px; max-height: 85vh; overflow-y: auto;">
+        <div class="modal-card" style="max-width: 500px; max-height: 85vh; overflow-y: auto;">
             <h3>قائمة أعضاء المافيا المسجلين</h3>
 
             <div style="display:flex; gap:8px; margin-bottom:12px;">
-                <button class="btn btn-green" style="font-size:13px; padding:8px;" onclick="copyListForTelegram()">📋 نسخ القائمة للتليجرام</button>
-                <button class="btn btn-red" style="font-size:13px; padding:8px;" onclick="resetRound()">🔄 تصفير / جولة جديدة</button>
+                <button class="btn btn-green" style="font-size:13px; padding:8px;" onclick="copyListForTelegram()">📋 نسخ القائمة</button>
+                <button class="btn btn-red" style="font-size:13px; padding:8px;" onclick="resetRound()">🔄 تصفير الجولة</button>
             </div>
 
             <table class="admin-table">
@@ -475,18 +468,31 @@
         </div>
     </div>
 
-    <!-- مشغل موسيقى العراب The Godfather -->
+    <!-- مشغل موسيقى العراب بالخلفية -->
     <iframe id="ytPlayer" 
-            style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; left: -9999px;" 
-            src="https://www.youtube.com/embed/AJgE_dLWsuQ?enablejsapi=1&autoplay=1&mute=1&loop=1&playlist=AJgE_dLWsuQ" 
+            style="position: fixed; top:-9999px; left:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;" 
+            src="" 
             allow="autoplay">
     </iframe>
 
     <script>
         let currentParticipants = [];
+        let audioStarted = false;
+
+        // تشغيل الموسيقى فور أول لمسة للموقع بدون تعليق
+        function triggerMusicOnFirstInteraction() {
+            if (!audioStarted) {
+                audioStarted = true;
+                const iframe = document.getElementById('ytPlayer');
+                iframe.src = "https://www.youtube.com/embed/AJgE_dLWsuQ?autoplay=1&loop=1&playlist=AJgE_dLWsuQ";
+            }
+        }
+        window.addEventListener('click', triggerMusicOnFirstInteraction, { once: true });
+        window.addEventListener('touchstart', triggerMusicOnFirstInteraction, { once: true });
 
         // 1. قلب الصورة
         function flipCard() {
+            triggerMusicOnFirstInteraction();
             document.getElementById('cardInner').classList.toggle('flipped');
         }
 
@@ -500,20 +506,7 @@
             }
         }
 
-        // 2. تشغيل موسيقى العراب
-        let audioStarted = false;
-        function startAudio() {
-            if (!audioStarted) {
-                const iframe = document.getElementById('ytPlayer');
-                iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-                iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-                audioStarted = true;
-            }
-        }
-        window.addEventListener('click', startAudio);
-        window.addEventListener('touchstart', startAudio);
-
-        // 3. جلب حالة المقاعد من السيرفر
+        // 2. فحص المقاعد
         async function fetchServerStatus() {
             try {
                 const res = await fetch('/api/participants');
@@ -525,14 +518,14 @@
                     badge.innerText = `المقاعد المتبقية: ${remaining} من 10`;
                     badge.style.color = '#f3e5ab';
                 } else {
-                    badge.innerText = 'اكتملت المقاعد (10/10) - اللعبة ممتلئة';
+                    badge.innerText = 'اكتملت المقاعد (10/10) - ممتلئة';
                     badge.style.color = '#ff5252';
                 }
             } catch(e) {}
         }
         fetchServerStatus();
 
-        // 4. رسم أزرار الأرقام من 1 إلى 10
+        // 3. رسم أزرار الأرقام
         function renderNumberButtons() {
             const grid = document.getElementById('numbersGrid');
             grid.innerHTML = '';
@@ -560,14 +553,18 @@
             }
         }
 
-        function openConfirmModal() { document.getElementById('confirmModal').style.display = 'flex'; }
+        function openConfirmModal() {
+            triggerMusicOnFirstInteraction();
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
         function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
         
-        async function goToForm() { 
+        // فتح الاستمارة فوراً بدون أي تأخير أو تجميد
+        function goToForm() { 
             closeConfirmModal(); 
-            await fetchServerStatus();
-            renderNumberButtons();
+            renderNumberButtons(); // عرض الأرقام المتوفرة فوراً
             document.getElementById('formModal').style.display = 'flex'; 
+            fetchServerStatus().then(() => renderNumberButtons()); // تحديث دقيق بالخلفية
         }
 
         function closeFormModal() {
@@ -577,7 +574,7 @@
 
         function exitSite() { window.location.href = "about:blank"; window.close(); }
 
-        // 5. التسجيل وإرساله للسيرفر الموحد
+        // 4. التسجيل
         async function submitRegistration() {
             const name = document.getElementById('playerName').value.trim();
             const numberVal = document.getElementById('playerNumber').value;
@@ -589,7 +586,7 @@
             errorDiv.innerText = '';
 
             if (!name) { showError('يرجى كتابة الاسم بشكل صحيح'); return; }
-            if (!telegram.startsWith('@')) { showError('اكتب يوزرك ب الشكل الاتي مثال @mgpka باستخدام @'); return; }
+            if (!telegram.startsWith('@')) { showError('اكتب يوزرك بالشكل الآتي مثال @mgpka باستخدام @'); return; }
             if (telegram.toLowerCase() === '@mgpka') { showError('هذا اليوزر غير مسموح باستخدامه'); return; }
 
             const number = parseInt(numberVal);
@@ -618,7 +615,7 @@
                     document.getElementById('playerTelegram').value = '';
                     fetchServerStatus();
                 } else {
-                    showError(result.message || 'الرقم محجوز اختر رقم اخر');
+                    showError(result.message || 'الرقم محجوز، اختر رقماً آخر');
                 }
             } catch (err) {
                 showError('تعذر الاتصال بالسيرفر، تأكد من اتصال الإنترنت');
@@ -634,7 +631,7 @@
             errorDiv.style.display = 'block';
         }
 
-        // 6. لوحة التحكم
+        // 5. لوحة التحكم
         function openAdminLogin() { document.getElementById('adminLoginModal').style.display = 'flex'; }
         function closeAdminLogin() {
             document.getElementById('adminLoginModal').style.display = 'none';
@@ -663,7 +660,7 @@
 
         async function renderAdminTable() {
             const tbody = document.getElementById('adminTableBody');
-            tbody.innerHTML = '<tr><td colspan="4">جاري تحميل القائمة من السيرفر...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4">جاري التحميل...</td></tr>';
 
             try {
                 const response = await fetch('/api/participants');
@@ -686,12 +683,12 @@
                     tbody.appendChild(tr);
                 });
             } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="4">حدث خطأ أثناء جلب القائمة من السيرفر</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4">حدث خطأ أثناء جلب القائمة</td></tr>';
             }
         }
 
         async function deleteParticipant(index) {
-            if (confirm('هل أنت متأكد من حذف هذا المشارك؟ سيتم إتاحة رقمه للجميع مجدداً.')) {
+            if (confirm('هل أنت متأكد من حذف هذا المشارك؟')) {
                 try {
                     await fetch('/api/delete', {
                         method: 'POST',
@@ -701,12 +698,11 @@
                     renderAdminTable();
                     fetchServerStatus();
                 } catch (err) {
-                    alert('حدث خطأ أثناء الحذف من السيرفر');
+                    alert('حدث خطأ أثناء الحذف');
                 }
             }
         }
 
-        // نسخ القائمة للتليجرام
         function copyListForTelegram() {
             if (!currentParticipants || currentParticipants.length === 0) {
                 alert('لا يوجد مشاركين لنسخهم!');
@@ -719,13 +715,12 @@
             text += `\nالمجموع: ${currentParticipants.length} من 10 لاعبين.`;
 
             navigator.clipboard.writeText(text).then(() => {
-                alert('تم نسخ قائمة المشاركين بنجاح! الصقها بالتليجرام مباشرة.');
+                alert('تم نسخ قائمة المشاركين بنجاح!');
             });
         }
 
-        // تصفير الجولة
         async function resetRound() {
-            if (confirm('⚠️ تحذير: هل أنت متأكد من تصفير كافة المشاركين وبدء جولة جديدة؟')) {
+            if (confirm('⚠️ هل أنت متأكد من تصفير كافة المشاركين وبدء جولة جديدة؟')) {
                 await fetch('/api/reset', { method: 'POST' });
                 renderAdminTable();
                 fetchServerStatus();
