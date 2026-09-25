@@ -1,8 +1,8 @@
 import json
 import os
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
 
 DATA_FILE = "participants.json"
 
@@ -20,6 +20,22 @@ def load_participants():
 def save_participants_data(data):
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+# منع الكاش في كروم لضمان تحديث الصفحة على هواتف اللاعبين
+@app.after_request
+def add_header(response):
+    response.headers["Cache-Control"] = (
+        "no-cache, no-store, must-revalidate, max-age=0"
+    )
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+
+@app.route("/static/<path:filename>")
+def serve_static(filename):
+    return send_from_directory("static", filename)
 
 
 @app.route("/")
@@ -45,7 +61,9 @@ def register():
     # 1. فحص الاسم
     if not name:
         return (
-            jsonify({"status": "error", "message": "يرجى كتابة الاسم بشكل صحيح"}),
+            jsonify(
+                {"status": "error", "message": "يرجى كتابة الاسم بشكل صحيح"}
+            ),
             400,
         )
 
@@ -55,7 +73,7 @@ def register():
             jsonify(
                 {
                     "status": "error",
-                    "message": "اكتب يوزرك ب الشكل الاتي مثال @mgpka باستخدام @",
+                    "message": "اكتب يوزرك بالشكل الآتي مثال @mgpka باستخدام @",
                 }
             ),
             400,
@@ -72,12 +90,12 @@ def register():
     # 3. فحص الرقم
     try:
         number = int(number_raw)
-        if number < 1 or number > 30:
+        if number < 1 or number > 10:
             raise ValueError()
     except Exception:
         return (
             jsonify(
-                {"status": "error", "message": "خطأ: اختر رقم بين 1 و 30 فقط"}
+                {"status": "error", "message": "خطأ: اختر رقم بين 1 و 10 فقط"}
             ),
             400,
         )
@@ -87,11 +105,12 @@ def register():
     # 4. فحص توفر الرقم بالسيرفر
     if any(p.get("number") == number for p in participants):
         return (
-            jsonify({"status": "error", "message": "الرقم محجوز اختر رقم اخر"}),
+            jsonify(
+                {"status": "error", "message": "الرقم محجوز، اختر رقماً آخر"}
+            ),
             400,
         )
 
-    # حفظ المشارك بالسيرفر
     participants.append({"name": name, "number": number, "telegram": telegram})
     save_participants_data(participants)
 
@@ -100,7 +119,7 @@ def register():
 
 @app.route("/api/delete", methods=["POST"])
 def delete_participant():
-    data = request.get_json()
+    data = request.get_json() or {}
     index = data.get("index")
     participants = load_participants()
 
@@ -110,6 +129,13 @@ def delete_participant():
         return jsonify({"status": "success"})
 
     return jsonify({"status": "error", "message": "العنصر غير موجود"}), 400
+
+
+# إضافة مسار التصفير لبدء جولة جديدة من لوحة التحكم
+@app.route("/api/reset", methods=["POST"])
+def reset_participants():
+    save_participants_data([])
+    return jsonify({"status": "success"})
 
 
 if __name__ == "__main__":
